@@ -69,5 +69,4 @@ class Ui_Form(object):
         self.Bt_OK.setText(_translate("Form", "确认"))
         self.Btn_Cancel.setText(_translate("Form", "取消"))
         self.Cbb_Username.setItemText(0, _translate("Form", "Engineer"))
-        self.Cbb_Username.setItemText(1, _translate("Form", "Operator"))
         self.label_3.setText(_translate("Form", "Welcome to Load Detection"))

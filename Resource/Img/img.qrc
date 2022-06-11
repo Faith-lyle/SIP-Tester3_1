@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="log">
+    <file>save.png</file>
     <file>luxshare2.png</file>
+    <file>cancel.png</file>
   </qresource>
 </RCC>

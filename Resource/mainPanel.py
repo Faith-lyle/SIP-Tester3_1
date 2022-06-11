@@ -11,12 +11,14 @@ from PyQt5 import QtGui
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QHeaderView, QAbstractItemView, QTableWidgetItem, \
     QLabel
-from PyQt5.QtCore import Qt,pyqtSlot
+from PyQt5.QtCore import Qt, pyqtSlot, pyqtSignal
 from Resource.UI.main_ui import Ui_MainWindow
 
 
 class MainPanel(QMainWindow, Ui_MainWindow):
-    def __init__(self, items,config_dict):
+    setting_signal = pyqtSignal()
+
+    def __init__(self, items, config_dict):
         super(MainPanel, self).__init__()
         self.show_result_list = []
         self.items = items
@@ -30,10 +32,10 @@ class MainPanel(QMainWindow, Ui_MainWindow):
         self.update_data_to_tabel(self.items)
         self.test_slot_init()
         try:
-            self.add_fail_qty(1,0)
-            self.add_pass_qty(1,0)
-            self.add_fail_qty(2,0)
-            self.add_pass_qty(2,0)
+            self.add_fail_qty(1, 0)
+            self.add_pass_qty(1, 0)
+            self.add_fail_qty(2, 0)
+            self.add_pass_qty(2, 0)
         except ZeroDivisionError:
             self.lb_site1_yield_2.setText("100%")
             self.lb_site1_yield.setText("100%")
@@ -130,7 +132,7 @@ class MainPanel(QMainWindow, Ui_MainWindow):
 
     def add_pass_qty(self, site, qty):
         if site == 1:
-            self.config_dict['PASSQty1']+= qty
+            self.config_dict['PASSQty1'] += qty
             self.lb_site1_pass.setText(str(self.config_dict['PASSQty1']))
             total = self.config_dict['PASSQty1'] + self.config_dict['FAILQty1']
             self.lb_site1_yield.setText("{:.2f}".format(self.config_dict['PASSQty1'] / total))
@@ -180,7 +182,7 @@ class MainPanel(QMainWindow, Ui_MainWindow):
         设置菜单栏
         :return:
         """
-        print('set')
+        self.setting_signal.emit()
     @pyqtSlot()
     def on_actionPDCA_triggered(self):
         """
@@ -196,8 +198,6 @@ class MainPanel(QMainWindow, Ui_MainWindow):
         :return:
         """
         ...
-
-
 
 
 if __name__ == '__main__':
