@@ -1,0 +1,9 @@
+.QWidget{
+    border:1px inset #000000;
+}
+.QTableWidget{
+    selection-background-color:#1E90FF;
+}
+.QPushButton{
+
+}
