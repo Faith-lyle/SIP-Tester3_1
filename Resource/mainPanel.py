@@ -10,22 +10,37 @@ import sys
 from PyQt5 import QtGui
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QHeaderView, QAbstractItemView, QTableWidgetItem, \
-    QLabel
+    QLabel, QPushButton
 from PyQt5.QtCore import Qt, pyqtSlot, pyqtSignal
 from Resource.UI.main_ui import Ui_MainWindow
+from Resource.helpPanel import HelpPanel
 
 
 class MainPanel(QMainWindow, Ui_MainWindow):
     setting_signal = pyqtSignal()
+    edit_text_signal = pyqtSignal(str)
+    pdca_signal = pyqtSignal(bool)
+    close_signal = pyqtSignal()
 
     def __init__(self, items, config_dict):
         super(MainPanel, self).__init__()
         self.show_result_list = []
         self.items = items
         self.config_dict = config_dict
+        self.user_slot_enable_flag = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        self.mes_slot_enable_flag = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
         self.setupUi(self)
         self.init_ui()
-        self.set_style_from_file("./Resource/Style/PDCA.css")
+        self.set_pdca_style()
+        self.lineEdit.editingFinished.connect(lambda: self.edit_text_signal.emit(self.lineEdit.text()))
+
+    def set_pdca_style(self):
+        if self.config_dict['PdcaMode']:
+            with open('./Resource/Style/PDCA.css', 'r') as f:
+                self.setStyleSheet(f.read())
+        else:
+            with open('./Resource/Style/NOPDCA.css', 'r') as f:
+                self.setStyleSheet(f.read())
 
     def init_ui(self):
         self.init_tabel_widget()
@@ -39,11 +54,6 @@ class MainPanel(QMainWindow, Ui_MainWindow):
         except ZeroDivisionError:
             self.lb_site1_yield_2.setText("100%")
             self.lb_site1_yield.setText("100%")
-
-    def set_style_from_file(self, file_path):
-        with open(file_path, "r") as f:
-            style = f.read()
-            self.setStyleSheet(style)
 
     def init_tabel_widget(self):
         self.tableWidget.setColumnCount(18)
@@ -74,6 +84,13 @@ class MainPanel(QMainWindow, Ui_MainWindow):
                 if x % 2 == 0:
                     Qitem.setBackground(QColor("#D4D4D4"))
                 self.tableWidget.setItem(x, y, Qitem)
+
+    def clear_line_edit(self):
+        """
+        清除lineEdit的内容，准备下一次测试
+        :return:
+        """
+        self.lineEdit.setText('')
 
     def add_value(self, row, column, value, color):
         """
@@ -112,23 +129,57 @@ class MainPanel(QMainWindow, Ui_MainWindow):
         """
         i = 0
         for chi in self.widget_4.children():
-            if type(chi) == QLabel:
+            if type(chi) == QPushButton:
                 self.show_result_list.append(chi)
-                chi.setGeometry(7 + (i * 65), 3, 55, 25)
+                chi.setGeometry(7 + (i * 65), 3, 57, 25)
                 chi.setText("Ready")
-                chi.setAlignment(Qt.AlignCenter)
+                chi.setProperty('slot', i + 1)
+                chi.setProperty('Enable', True)
+                chi.setStyleSheet('border:1px outset black;background-color:Cyan')
+                chi.clicked.connect(self.link_clicked)
                 i += 1
+
+    def link_clicked(self):
+        slot = self.sender().property('slot')
+        enable = self.sender().property('Enable')
+        self.sender().setProperty("Enable", False if enable else True)
+        if not enable:
+            self.sender().setStyleSheet('border:1px outset black;background-color:Cyan')
+            self.sender().setText("Ready")
+            self.user_slot_enable_flag[slot - 1] = 1
+        else:
+            self.sender().setStyleSheet('border:1px outset black;background-color:Gray')
+            self.sender().setText("Skip")
+            self.user_slot_enable_flag[slot - 1] = 0
+
+        print(self.user_slot_enable_flag)
 
     def test_slot_show_result(self, result: str, slot: int):
         if result == 'PASS':
-            self.show_result_list[slot].setStyleSheet("background-color: green;")
+            self.show_result_list[slot].setStyleSheet("'border:1px outset black;background-color: green;")
             self.show_result_list[slot].setText("PASS")
         elif result == "FAIL":
-            self.show_result_list[slot].setStyleSheet("background-color: red;")
+            self.show_result_list[slot].setStyleSheet("'border:1px outset black;background-color: red;")
             self.show_result_list[slot].setText("FAIL")
         elif result == "TEST":
-            self.show_result_list[slot].setStyleSheet("background-color: yellow;")
+            self.show_result_list[slot].setStyleSheet("'border:1px outset black;background-color: yellow;")
             self.show_result_list[slot].setText("Testing")
+
+    def test_slot_enable(self, enable, slot):
+        """
+        MES enable 测试通道
+        :param enable: Ture or False
+        :param slot:  通道号
+        :return:
+        """
+        if enable:
+            self.show_result_list[slot].setStyleSheet('border:1px outset black;background-color:Cyan')
+            self.show_result_list[slot].setText("Ready")
+            self.mes_slot_enable_flag[slot] = 1
+        else:
+            self.show_result_list[slot].setStyleSheet('border:1px outset black;background-color:Gray')
+            self.show_result_list[slot].setText("Skip")
+            self.mes_slot_enable_flag[slot] = 0
 
     def add_pass_qty(self, site, qty):
         if site == 1:
@@ -183,13 +234,26 @@ class MainPanel(QMainWindow, Ui_MainWindow):
         :return:
         """
         self.setting_signal.emit()
+
     @pyqtSlot()
-    def on_actionPDCA_triggered(self):
+    def on_actionDisable_triggered(self):
         """
-        PDCA 设置栏
+        PDCA 关闭
         :return:
         """
-        ...
+        self.lb_Pdca.setText("NOPDCA")
+        self.config_dict['PdcaMode'] = False
+        self.pdca_signal.emit(False)
+
+    @pyqtSlot()
+    def on_actionEnable_triggered(self):
+        """
+        PDCA 开启
+        :return:
+        """
+        self.lb_Pdca.setText("PDCA")
+        self.config_dict['PdcaMode'] = True
+        self.pdca_signal.emit(True)
 
     @pyqtSlot()
     def on_actionHelp_triggered(self):
@@ -197,7 +261,12 @@ class MainPanel(QMainWindow, Ui_MainWindow):
         帮助栏
         :return:
         """
-        ...
+        self.help = HelpPanel()
+        self.help.show()
+
+    def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
+        self.close_signal.emit()
+        super(MainPanel, self).closeEvent(a0)
 
 
 if __name__ == '__main__':

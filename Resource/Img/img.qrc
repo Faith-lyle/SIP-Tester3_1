@@ -1,5 +1,12 @@
 <RCC>
   <qresource prefix="log">
+    <file>information.png</file>
+    <file>connect.png</file>
+    <file>disconnect.png</file>
+    <file>search2-48.png</file>
+    <file>search4-48.png</file>
+    <file>search6-48.png</file>
+    <file>search8-48.png</file>
     <file>save.png</file>
     <file>luxshare2.png</file>
     <file>cancel.png</file>

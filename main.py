@@ -12,6 +12,7 @@ import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox
 from Resource.mainPanel import MainPanel
 from Resource.longinpanel import LoginPanel
+from Resource.settingPanel import SettingPanel
 from Tools.utils import *
 
 configBaseDir = os.path.expanduser("~/SIP_Tester3")
@@ -29,6 +30,21 @@ def config_file_check():
 
 def main_signal_connect():
     main.setting_signal.connect(main_setting_signal_slot)
+    main.close_signal.connect(main_close_signal_slot)
+    main.pdca_signal.connect(main_pdca_signal_slot)
+
+
+def main_pdca_signal_slot(enable):
+    if enable:
+        main.set_pdca_style()
+        config_json["PdcaMode"] = True
+    else:
+        main.set_pdca_style()
+        config_json["PdcaMode"] = False
+
+
+def main_close_signal_slot():
+    helper.sava_json(config_json_path, config_json)
 
 
 def main_setting_signal_slot():
@@ -38,11 +54,21 @@ def main_setting_signal_slot():
 
 def login_signal_connect():
     login.cancel_signal.connect(login_cancel_signal_slot)
+    login.passWorld_ture_siganl.connect(login_open_setting_panel)
 
 
 def login_cancel_signal_slot():
     login.hide()
     main.show()
+
+
+def login_open_setting_panel():
+    login.hide()
+    setting.show()
+
+
+def setting_signal_connect():
+    ...
 
 
 if __name__ == '__main__':
@@ -55,5 +81,7 @@ if __name__ == '__main__':
     main_signal_connect()
     login = LoginPanel('admin')
     login_signal_connect()
+    setting = SettingPanel(config_json)
+    setting_signal_connect()
     main.show()
     sys.exit(app.exec_())

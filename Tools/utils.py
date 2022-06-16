@@ -154,5 +154,15 @@ class CommonHelper:
             data = json.load(f, encoding='utf-8')
             return data
 
+    @staticmethod
+    def sava_json(file_path,data):
+        with open(file_path,'w') as f:
+            json.dump(data,f,ensure_ascii=False,indent=4)
+
+    @staticmethod
+    def read_qss(file_path):
+        with open(file_path, 'r') as f:
+            return f.read()
+
 if __name__ == '__main__':
     ...

@@ -16,7 +16,7 @@ from Resource.UI.Login_UI import Ui_Form
 
 
 class LoginPanel(QMainWindow, Ui_Form):
-    passWorld_ture_siganl = pyqtSignal(str)
+    passWorld_ture_siganl = pyqtSignal()
     cancel_signal = pyqtSignal()
 
     def __init__(self,key):
@@ -28,7 +28,7 @@ class LoginPanel(QMainWindow, Ui_Form):
     def on_Bt_OK_clicked(self):
         user_name = self.Cbb_Username.currentText()
         if self.Edt_Password.text() == self.key:
-            self.passWorld_ture_siganl.emit(user_name)
+            self.passWorld_ture_siganl.emit()
         else:
             for i in range(1000):
                 animation = QPropertyAnimation(self)

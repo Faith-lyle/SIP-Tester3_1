@@ -1,14 +1,14 @@
 .QWidget{
     border:1px inset #000000;
-    background-color:#FFFFFF;
+    background-color:#FFDEAD;
 }
 .QTableWidget{
     selection-background-color:#1E90FF;
 }
-.QPushButton{
-
-}
 .QLabel#lb_Pdca{
     font: 75 22pt "Arial";
-    color: rgb(255, 211, 17);
+    color: rgb(200, 220, 220);
+}
+.QPushButton{
+
 }
